@@ -1,12 +1,13 @@
-<div id="game-grid" class="inline-block border border-black">
+<div id="game-grid" class="inline-block border border-black" data-game-target="grid">
   <% grid.each_with_index do |row, row_index| %>
     <div class="flex">
-      <% row.each_with_index do |cell, col_index| %>
+      <% row.each_with_index do |cell_alive, col_index| %>
         <div 
           data-action="click->game#toggleCell"
-          data-cell-state="dead"
-          data-row="<%= row_index %>" 
+          data-cell
+          data-cell-state="<%= cell_alive ? 'alive' : 'dead' %>"
           data-col="<%= col_index %>"
+          data-row="<%= row_index %>" 
           class="w-4 h-4 border border-gray-300 cursor-pointer">
         </div>
       <% end %>
