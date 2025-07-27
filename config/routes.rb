@@ -1,5 +1,9 @@
 Rails.application.routes.draw do
-  resources :games, only: %i[new]
+  resources :game, only: %i[new] do
+    collection do
+      post :next_generation
+    end
+  end
   devise_for :users
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
