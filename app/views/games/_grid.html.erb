@@ -2,9 +2,12 @@
   <% grid.each_with_index do |row, row_index| %>
     <div class="flex">
       <% row.each_with_index do |cell, col_index| %>
-        <div data-row="<%= row_index %>" 
-             data-col="<%= col_index %>"
-             class="w-4 h-4 border border-gray-300 cursor-pointer <%= cell ? 'bg-black' : 'bg-white' %>">
+        <div 
+          data-action="click->game#toggleCell"
+          data-cell-state="dead"
+          data-row="<%= row_index %>" 
+          data-col="<%= col_index %>"
+          class="w-4 h-4 border border-gray-300 cursor-pointer">
         </div>
       <% end %>
     </div>

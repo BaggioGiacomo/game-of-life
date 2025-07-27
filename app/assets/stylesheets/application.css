@@ -8,3 +8,11 @@
  *
  * Consider organizing styles into separate files for maintainability.
  */
+
+div[data-cell-state="alive"] {
+  background-color: black;
+}
+
+div[data-cell-state="dead"] {
+  background-color: white;
+}
