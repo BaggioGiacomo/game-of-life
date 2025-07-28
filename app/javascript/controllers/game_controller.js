@@ -2,8 +2,11 @@ import { Controller } from "@hotwired/stimulus";
 
 // Connects to data-controller="game"
 export default class extends Controller {
-  static targets = ["grid"];
-  connect() {}
+  static targets = ["grid", "speedInput"];
+  connect() {
+    this.isPlaying = false;
+    this.intervalId = null;
+  }
 
   toggleCell(event) {
     event.target.setAttribute(
@@ -14,7 +17,33 @@ export default class extends Controller {
     );
   }
 
-  async getNextGeneration() {
+  togglePlay() {
+    if (this.isPlaying) {
+      this.#stop();
+    } else {
+      this.#start();
+    }
+  }
+
+  #start() {
+    this.playing = true;
+
+    const speed = parseInt(this.speedInputTarget.value);
+    this.intervalId = setInterval(() => {
+      this.#getNextGeneration();
+    }, speed);
+  }
+
+  #stop() {
+    this.playing = false;
+
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+    }
+  }
+
+  async #getNextGeneration() {
     const grid = this.#getCurrentGrid();
     const response = await fetch("/game/next_generation", {
       method: "POST",

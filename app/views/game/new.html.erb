@@ -2,7 +2,7 @@
   <h1 class="text-3xl font-bold">Conway's Game of Life</h1>
   <%= form_with url: new_game_path, method: :get, scope: :game do |form| %>
     <div class="flex gap-4">
-      <button type="button" class="py-2 px-4 rounded-md bg-green-600 hover:bg-green-700 text-white" data-action="game#getNextGeneration">Start</button>
+      <button type="button" class="py-2 px-4 rounded-md bg-green-600 hover:bg-green-700 text-white" data-action="game#togglePlay">Start</button>
       <button type="button" class="py-2 px-4 rounded-md bg-red-600 hover:bg-red-700 text-white">Reset</button>
       <div class="flex items-center gap-2">
         <label for="grid-size" class="block text-sm font-medium text-gray-700">Grid Size:</label>
@@ -41,6 +41,9 @@
           ], params[:speed] || '500'),
           id: 'game-speed',
           class: 'border border-gray-200 p-2 rounded-md',
+          data: {
+            game_target: 'speedInput'
+          },
           onchange: 'this.form.submit()' 
         %>
       </div>
