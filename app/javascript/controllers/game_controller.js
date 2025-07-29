@@ -2,7 +2,13 @@ import { Controller } from "@hotwired/stimulus";
 import consumer from "channels/consumer";
 
 export default class extends Controller {
-  static targets = ["grid", "speedInput", "playButton"];
+  static targets = [
+    "grid",
+    "speedInput",
+    "playButton",
+    "widthInput",
+    "heightInput",
+  ];
 
   connect() {
     this.isPlaying = false;
