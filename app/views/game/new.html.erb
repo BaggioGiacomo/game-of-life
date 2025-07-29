@@ -5,7 +5,7 @@
       <div class="flex items-center gap-2">
         <label for="grid-width" class="block text-sm font-medium text-gray-700">Width:</label>
         <%= number_field_tag :width, 
-          params[:width] || 30,
+          params[:width] || 50,
           id: 'grid-width',
           min: 10,
           max: 100,
@@ -28,27 +28,6 @@
             game_target: 'heightInput'
           },
           onchange: 'this.form.submit()' 
-        %>
-      </div>
-      <div class="flex items-center gap-2">
-        <label for="preset-size" class="block text-sm font-medium text-gray-700">Preset:</label>
-        <%= select_tag :preset, 
-          options_for_select([
-            ['Custom', ''],
-            ['10x10', '10x10'],
-            ['20x20', '20x20'],
-            ['30x30', '30x30'],
-            ['40x40', '40x40'],
-            ['50x50', '50x50'],
-            ['30x20', '30x20'],
-            ['40x30', '40x30'],
-            ['60x40', '60x40'],
-            ['80x60', '80x60'],
-            ['100x80', '100x80']
-          ], ''),
-          id: 'preset-size',
-          class: 'border border-gray-200 p-2 rounded-md',
-          data: { action: 'change->game#applyPreset' }
         %>
       </div>
       <div class="flex items-center gap-2">
@@ -75,9 +54,6 @@
       </div>
     </div>
   <% end %>
-  <div class="text-sm text-gray-600 mb-2">
-    Grid: <%= @game.width %> × <%= @game.height %> cells
-  </div>
   <%= render "grid", grid: @game.grid %>
   <div class="flex gap-4">
     <button type="button" class="py-2 px-4 rounded-md bg-green-600 hover:bg-green-700 text-white min-w-[100px]" data-action="game#togglePlay" data-game-target="playButton">Start</button>

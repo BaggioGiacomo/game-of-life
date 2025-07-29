@@ -17,7 +17,7 @@ class GameController < ApplicationController
   private
 
     def grid_width
-      return 30 unless params[:width].present?
+      return 50 unless params[:width].present?
       params[:width].to_i.clamp(10, 100)
     end
 

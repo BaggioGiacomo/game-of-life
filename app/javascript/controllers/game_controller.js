@@ -131,15 +131,4 @@ export default class extends Controller {
     );
     this.playButtonTarget.classList.add("bg-blue-600", "hover:bg-blue-700");
   }
-
-  applyPreset(event) {
-    const preset = event.target.value;
-    if (!preset) return;
-
-    const [width, height] = preset.split("x").map((n) => parseInt(n));
-
-    this.widthInputTarget.value = width;
-    this.heightInputTarget.value = height;
-    this.widthInputTarget.form.submit();
-  }
 }
