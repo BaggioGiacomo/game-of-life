@@ -11,7 +11,7 @@ class GameChannel < ApplicationCable::Channel
   def start_game(data)
     stop_game
 
-    @game = Game.from_params(data["grid"])
+    @game = Game.from_params(data["grid"], data["generationNumber"] || 0)
     return if @game.nil?
 
     @speed = data["speed"].to_i.clamp(100, 1000)
@@ -26,7 +26,8 @@ class GameChannel < ApplicationCable::Channel
           "game_#{@game_id}_#{current_user.id}",
           {
             action: "update_cells",
-            changes: next_game.changes
+            changes: next_game.changes,
+            generation_number: next_game.generation_number
           }
         )
 

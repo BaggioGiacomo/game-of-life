@@ -1,11 +1,12 @@
 class Game
-  attr_reader :grid, :width, :height, :changes
+  attr_reader :grid, :width, :height, :changes, :generation_number
 
-  def initialize(width: 30, height: 30, grid: nil)
+  def initialize(width: 30, height: 30, grid: nil, generation_number: 0)
     @width = width
     @height = height
     @grid = grid || Game.empty_grid(width, height)
     @changes = []
+    @generation_number = generation_number
   end
 
   class << self
@@ -13,16 +14,15 @@ class Game
       Array.new(height) { Array.new(width, false) }
     end
 
-    def from_params(grid_params)
-      return nil unless grid_params.is_a?(Array) && !grid_params.empty?
+    def from_params(grid, generation_number = 0)
+      return nil unless grid.is_a?(Array) && !grid.empty?
 
-      height = grid_params.length
-      width = grid_params.first&.length || 0
+      height = grid.length
+      width = grid.first&.length || 0
 
-      # Validate that all rows have the same length
-      return nil unless grid_params.all? { |row| row.length == width }
+      return nil unless grid.all? { |row| row.length == width }
 
-      new(width: width, height: height, grid: grid_params)
+      new(width: width, height: height, grid: grid, generation_number: generation_number)
     end
 
     def from_living_cells(width, height, living_cells)
@@ -49,7 +49,7 @@ class Game
       end
     end
 
-    game = Game.new(width: @width, height: @height, grid: new_grid)
+    game = Game.new(width: @width, height: @height, grid: new_grid, generation_number: @generation_number + 1)
     game.instance_variable_set(:@changes, changes)
     game
   end
