@@ -8,6 +8,7 @@ export default class extends Controller {
     "playButton",
     "widthInput",
     "heightInput",
+    "generationNumber",
   ];
 
   connect() {
@@ -49,6 +50,8 @@ export default class extends Controller {
             );
           }
         });
+        this.generationNumberTarget.textContent =
+          parseInt(this.generationNumberTarget.textContent || "0") + 1;
         break;
 
       case "cell_toggled":
@@ -81,6 +84,7 @@ export default class extends Controller {
   start() {
     this.isPlaying = true;
     this.#showPauseButton();
+    this.#disableInputs();
 
     const speed = parseInt(this.speedInputTarget.value);
 
@@ -93,6 +97,7 @@ export default class extends Controller {
   pause() {
     this.isPlaying = false;
     this.#showStartButton();
+    this.#enableInputs();
     this.subscription.perform("stop_game");
   }
 
@@ -136,6 +141,7 @@ export default class extends Controller {
     cells.forEach((cell) => {
       cell.setAttribute("data-cell-state", "dead");
     });
+    this.generationNumberTarget.textContent = "0";
   }
 
   #getCurrentGrid() {
@@ -187,5 +193,17 @@ export default class extends Controller {
       "hover:bg-green-700"
     );
     this.playButtonTarget.classList.add("bg-blue-600", "hover:bg-blue-700");
+  }
+
+  #disableInputs() {
+    this.widthInputTarget.disabled = true;
+    this.heightInputTarget.disabled = true;
+    this.speedInputTarget.disabled = true;
+  }
+
+  #enableInputs() {
+    this.widthInputTarget.disabled = false;
+    this.heightInputTarget.disabled = false;
+    this.speedInputTarget.disabled = false;
   }
 }
