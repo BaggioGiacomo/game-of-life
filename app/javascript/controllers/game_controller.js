@@ -14,6 +14,8 @@ export default class extends Controller {
   }
 
   toggleCell(event) {
+    if (this.isPlaying) return;
+
     event.target.setAttribute(
       "data-cell-state",
       event.target.getAttribute("data-cell-state") === "alive"
@@ -32,14 +34,13 @@ export default class extends Controller {
 
   #start() {
     this.isPlaying = true;
-    this.playButtonTarget.textContent = "Pause";
-    this.playButtonTarget.classList.remove(
-      "bg-green-600",
-      "hover:bg-green-700"
-    );
-    this.playButtonTarget.classList.add("bg-blue-600", "hover:bg-blue-700");
+    this.#showPauseButton();
 
-    const speed = parseInt(this.speedInputTarget.value);
+    const speed = Math.min(
+      1000,
+      Math.max(300, parseInt(this.speedInputTarget.value))
+    );
+
     this.intervalId = setInterval(() => {
       this.#getNextGeneration();
     }, speed);
@@ -47,9 +48,7 @@ export default class extends Controller {
 
   #pause() {
     this.isPlaying = false;
-    this.playButtonTarget.textContent = "Start";
-    this.playButtonTarget.classList.remove("bg-blue-600", "hover:bg-blue-700");
-    this.playButtonTarget.classList.add("bg-green-600", "hover:bg-green-700");
+    this.#showStartButton();
 
     if (this.intervalId) {
       clearInterval(this.intervalId);
@@ -90,5 +89,20 @@ export default class extends Controller {
     });
 
     return grid;
+  }
+
+  #showStartButton() {
+    this.playButtonTarget.textContent = "Start";
+    this.playButtonTarget.classList.remove("bg-blue-600", "hover:bg-blue-700");
+    this.playButtonTarget.classList.add("bg-green-600", "hover:bg-green-700");
+  }
+
+  #showPauseButton() {
+    this.playButtonTarget.textContent = "Pause";
+    this.playButtonTarget.classList.remove(
+      "bg-green-600",
+      "hover:bg-green-700"
+    );
+    this.playButtonTarget.classList.add("bg-blue-600", "hover:bg-blue-700");
   }
 }
