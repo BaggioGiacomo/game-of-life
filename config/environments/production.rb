@@ -87,4 +87,9 @@ Rails.application.configure do
   #
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+
+  config.action_cable.mount_path = "/cable"
+  config.action_cable.allowed_request_origins = [
+  "https://game-of-life-crimson-glade-8245.fly.dev"
+]
 end
