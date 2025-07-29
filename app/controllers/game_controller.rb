@@ -1,6 +1,11 @@
 class GameController < ApplicationController
   def new
-    @game = Game.new(width: grid_width, height: grid_height)
+    if params[:living_cells].present?
+      living_cells = JSON.parse(params[:living_cells]).map { |cell| [ cell["row"], cell["col"] ] }
+      @game = Game.from_living_cells(grid_width, grid_height, living_cells)
+    else
+      @game = Game.new(width: grid_width, height: grid_height)
+    end
   end
 
   def next_generation
@@ -12,6 +17,12 @@ class GameController < ApplicationController
     else
       head :unprocessable_entity
     end
+  end
+
+  def resize
+    living_cells = params[:living_cells] || []
+    game = Game.from_living_cells(params[:width].to_i, params[:height].to_i, living_cells)
+    render_grid_update game.grid
   end
 
   private

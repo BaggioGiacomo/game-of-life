@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   resources :game, only: %i[new] do
     collection do
       post :next_generation  # Keep this for fallback/initial load
+      post :resize
     end
   end
 
