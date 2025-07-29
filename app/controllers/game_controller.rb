@@ -19,7 +19,7 @@ class GameController < ApplicationController
     def game_size
       return 30 unless params[:size].present?
 
-      params[:size].to_i.clamp(10, 70)
+      params[:size].to_i.clamp(10, 100)
     end
 
     def render_grid_update(grid)
