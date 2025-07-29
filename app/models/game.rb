@@ -1,9 +1,10 @@
 class Game
-  attr_reader :grid, :size
+  attr_reader :grid, :size, :changes
 
   def initialize(size: 30, grid: nil)
     @size = size
     @grid = grid || Game.empty_grid(size)
+    @changes = []
   end
 
   class << self
@@ -20,28 +21,57 @@ class Game
   end
 
   def next_generation
-    new_grid = Array.new(rows) { Array.new(cols, false) }
+    new_grid = Game.empty_grid grid_size
+    changes = []
 
     (0...rows).each do |row|
       (0...cols).each do |col|
         alive_neighbors = count_alive_neighbors(row, col)
         current_cell = @grid[row][col]
+        new_state = will_be_alive?(current_cell, alive_neighbors)
 
-        new_grid[row][col] = will_be_alive?(current_cell, alive_neighbors)
+        new_grid[row][col] = new_state
+        changes << { row:, col:, alive: new_state } if current_cell != new_state
       end
     end
 
-    self.class.new(size: @size, grid: new_grid)
+    game = Game.new(size: @size, grid: new_grid)
+    game.instance_variable_set(:@changes, changes)
+    game
+  end
+
+  def living_cells
+    cells = []
+    (0...rows).each do |row|
+      (0...cols).each do |col|
+        cells << [ row, col ] if @grid[row][col]
+      end
+    end
+    cells
+  end
+
+  def self.from_living_cells(size, living_cells)
+    grid = empty_grid(size)
+    living_cells.each do |row, col|
+      grid[row][col] = true if row < size && col < size
+    end
+    new(size: size, grid: grid)
   end
 
   private
 
+    # Since the grid is square, we can use either dimension for rows and cols
+    # I'll keep both methods if in the future I want to support non-square grids
     def rows
-      @grid.length
+      grid_size
     end
 
     def cols
-      @grid[0].length
+      grid_size
+    end
+
+    def grid_size
+      @grid.length
     end
 
     def will_be_alive?(current_state, neighbor_count)
