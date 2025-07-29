@@ -99,11 +99,11 @@ export default class extends Controller {
   resizeGrid() {
     if (this.isPlaying) this.pause();
 
-    let width = parseInt(this.widthInputTarget.value);
-    let height = parseInt(this.heightInputTarget.value);
+    let width = parseInt(this.widthInputTarget.value || 1);
+    let height = parseInt(this.heightInputTarget.value || 1);
 
-    width = Math.max(10, Math.min(100, width));
-    height = Math.max(10, Math.min(100, height));
+    width = Math.max(1, Math.min(100, width));
+    height = Math.max(1, Math.min(100, height));
 
     this.widthInputTarget.value = width;
     this.heightInputTarget.value = height;

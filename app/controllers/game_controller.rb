@@ -1,11 +1,24 @@
 class GameController < ApplicationController
   def new
+    if params[:pattern_file].present?
+      load_pattern_from_file and return
+    end
+
     if params[:living_cells].present?
       living_cells = JSON.parse(params[:living_cells]).map { |cell| [ cell["row"], cell["col"] ] }
       @game = Game.from_living_cells(grid_width, grid_height, living_cells)
     else
       @game = Game.new(width: grid_width, height: grid_height)
     end
+  end
+
+  def create
+    if params[:pattern_file].present?
+      load_pattern_from_file
+    else
+      @game = Game.new(width: grid_width, height: grid_height)
+    end
+    render :new
   end
 
   def next_generation
@@ -26,6 +39,21 @@ class GameController < ApplicationController
   end
 
   private
+
+    def load_pattern_from_file
+      pattern_data = GamePatternParser.parse(params[:pattern_file])
+      @game = Game.from_living_cells(
+        pattern_data[:width],
+        pattern_data[:height],
+        pattern_data[:living_cells]
+      )
+
+      params[:width] = pattern_data[:width]
+      params[:height] = pattern_data[:height]
+    rescue GamePatternParser::ParseError => e
+      flash.now[:alert] = e.message
+      @game = Game.new(width: grid_width, height: grid_height)
+    end
 
     def grid_width
       return 50 unless params[:width].present?

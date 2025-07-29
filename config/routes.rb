@@ -7,6 +7,7 @@ Rails.application.routes.draw do
     collection do
       post :next_generation  # Keep this for fallback/initial load
       post :resize
+      post "/new", to: "game#create"
     end
   end
 
