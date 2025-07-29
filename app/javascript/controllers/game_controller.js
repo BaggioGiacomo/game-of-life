@@ -50,8 +50,7 @@ export default class extends Controller {
             );
           }
         });
-        this.generationNumberTarget.textContent =
-          parseInt(this.generationNumberTarget.textContent || "0") + 1;
+        this.generationNumberTarget.textContent = data.generation_number;
         break;
 
       case "cell_toggled":
@@ -91,6 +90,7 @@ export default class extends Controller {
     this.subscription.perform("start_game", {
       grid: this.#getCurrentGrid(),
       speed: speed,
+      generationNumber: parseInt(this.generationNumberTarget.textContent) || 0,
     });
   }
 
