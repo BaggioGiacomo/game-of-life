@@ -2,10 +2,15 @@ import { Controller } from "@hotwired/stimulus";
 
 // Connects to data-controller="game"
 export default class extends Controller {
-  static targets = ["grid", "speedInput"];
+  static targets = ["grid", "speedInput", "playButton"];
+
   connect() {
     this.isPlaying = false;
     this.intervalId = null;
+  }
+
+  disconnect() {
+    if (this.intervalId) clearInterval(this.intervalId);
   }
 
   toggleCell(event) {
@@ -19,14 +24,20 @@ export default class extends Controller {
 
   togglePlay() {
     if (this.isPlaying) {
-      this.#stop();
+      this.#pause();
     } else {
       this.#start();
     }
   }
 
   #start() {
-    this.playing = true;
+    this.isPlaying = true;
+    this.playButtonTarget.textContent = "Pause";
+    this.playButtonTarget.classList.remove(
+      "bg-green-600",
+      "hover:bg-green-700"
+    );
+    this.playButtonTarget.classList.add("bg-blue-600", "hover:bg-blue-700");
 
     const speed = parseInt(this.speedInputTarget.value);
     this.intervalId = setInterval(() => {
@@ -34,8 +45,11 @@ export default class extends Controller {
     }, speed);
   }
 
-  #stop() {
-    this.playing = false;
+  #pause() {
+    this.isPlaying = false;
+    this.playButtonTarget.textContent = "Start";
+    this.playButtonTarget.classList.remove("bg-blue-600", "hover:bg-blue-700");
+    this.playButtonTarget.classList.add("bg-green-600", "hover:bg-green-700");
 
     if (this.intervalId) {
       clearInterval(this.intervalId);
