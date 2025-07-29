@@ -1,5 +1,10 @@
 <div class="flex flex-col items-center min-h-full gap-6" data-controller="game" data-game-id="<%= SecureRandom.hex(8) %>">
   <h1 class="text-3xl font-bold">Conway's Game of Life</h1>
+  <% if flash[:alert] %>
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative max-w-xl" role="alert">
+      <span class="block sm:inline"><%= flash[:alert] %></span>
+    </div>
+  <% end %>
   <div class="flex gap-4 flex-wrap justify-center">
     <div class="flex items-center gap-2">
       <label for="grid-width" class="block text-sm font-medium text-gray-700">Width:</label>
@@ -52,6 +57,25 @@
       %>
     </div>
   </div>
+  <%= form_with url: new_game_path, method: :post, local: true, html: { multipart: true } do |form| %>
+    <div class="flex items-center gap-2 mt-4">
+      <label for="pattern-file" class="block text-sm font-medium text-gray-700">Load Pattern:</label>
+      <%= form.file_field :pattern_file, 
+        id: 'pattern-file',
+        accept: '.rle,.cells,.txt',
+        class: 'block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100',
+        onchange: 'this.form.submit()'
+      %>
+      <span class="text-xs text-gray-500">Supports .rle, .cells, .txt</span>
+    </div>
+    <div class="text-xs text-gray-600 mt-2">
+      <p>Try these example patterns: 
+        <a href="/patterns/glider.rle" class="text-blue-600 hover:underline">Glider</a>,
+        <a href="/patterns/blinker.cells" class="text-blue-600 hover:underline">Blinker</a>,
+        <a href="/patterns/gosper_glider_gun.rle" class="text-blue-600 hover:underline">Gosper Gun</a>
+      </p>
+    </div>
+  <% end %>
   <%= render "grid", grid: @game.grid %>
   <div class="flex gap-4">
     <button type="button" class="py-2 px-4 rounded-md bg-green-600 hover:bg-green-700 text-white min-w-[100px]" data-action="game#togglePlay" data-game-target="playButton">Start</button>
