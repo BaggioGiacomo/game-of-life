@@ -2,7 +2,13 @@ import { Controller } from "@hotwired/stimulus";
 import consumer from "channels/consumer";
 
 export default class extends Controller {
-  static targets = ["grid", "speedInput", "playButton"];
+  static targets = [
+    "grid",
+    "speedInput",
+    "playButton",
+    "widthInput",
+    "heightInput",
+  ];
 
   connect() {
     this.isPlaying = false;
@@ -124,5 +130,16 @@ export default class extends Controller {
       "hover:bg-green-700"
     );
     this.playButtonTarget.classList.add("bg-blue-600", "hover:bg-blue-700");
+  }
+
+  applyPreset(event) {
+    const preset = event.target.value;
+    if (!preset) return;
+
+    const [width, height] = preset.split("x").map((n) => parseInt(n));
+
+    this.widthInputTarget.value = width;
+    this.heightInputTarget.value = height;
+    this.widthInputTarget.form.submit();
   }
 }

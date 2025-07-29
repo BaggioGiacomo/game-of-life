@@ -32,6 +32,10 @@ class GameChannel < ApplicationCable::Channel
 
         @game = next_game
       end
+    rescue => e
+      Rails.logger.error "Game thread error: #{e.message}"
+    ensure
+      @running = false
     end
   end
 

@@ -1,31 +1,45 @@
 class Game
-  attr_reader :grid, :size, :changes
+  attr_reader :grid, :width, :height, :changes
 
-  def initialize(size: 30, grid: nil)
-    @size = size
-    @grid = grid || Game.empty_grid(size)
+  def initialize(width: 30, height: 30, grid: nil)
+    @width = width
+    @height = height
+    @grid = grid || Game.empty_grid(width, height)
     @changes = []
   end
 
   class << self
-    def empty_grid(size)
-      Array.new(size) { Array.new(size, false) }
+    def empty_grid(width, height)
+      Array.new(height) { Array.new(width, false) }
     end
 
     def from_params(grid_params)
       return nil unless grid_params.is_a?(Array) && !grid_params.empty?
 
-      size = grid_params.length
-      new(size: size, grid: grid_params)
+      height = grid_params.length
+      width = grid_params.first&.length || 0
+
+      # Validate that all rows have the same length
+      return nil unless grid_params.all? { |row| row.length == width }
+
+      new(width: width, height: height, grid: grid_params)
+    end
+
+    def from_living_cells(width, height, living_cells)
+      grid = empty_grid(width, height)
+      living_cells.each do |row, col|
+        grid[row][col] = true if row < height && col < width
+      end
+      new(width: width, height: height, grid: grid)
     end
   end
 
   def next_generation
-    new_grid = Game.empty_grid grid_size
+    new_grid = Game.empty_grid(width, height)
     changes = []
 
-    (0...rows).each do |row|
-      (0...cols).each do |col|
+    (0...height).each do |row|
+      (0...width).each do |col|
         alive_neighbors = count_alive_neighbors(row, col)
         current_cell = @grid[row][col]
         new_state = will_be_alive?(current_cell, alive_neighbors)
@@ -35,44 +49,27 @@ class Game
       end
     end
 
-    game = Game.new(size: @size, grid: new_grid)
+    game = Game.new(width: @width, height: @height, grid: new_grid)
     game.instance_variable_set(:@changes, changes)
     game
   end
 
   def living_cells
     cells = []
-    (0...rows).each do |row|
-      (0...cols).each do |col|
+    (0...height).each do |row|
+      (0...width).each do |col|
         cells << [ row, col ] if @grid[row][col]
       end
     end
     cells
   end
 
-  def self.from_living_cells(size, living_cells)
-    grid = empty_grid(size)
-    living_cells.each do |row, col|
-      grid[row][col] = true if row < size && col < size
-    end
-    new(size: size, grid: grid)
+  # Convenience method for square grids
+  def self.square(size: 30, grid: nil)
+    new(width: size, height: size, grid:)
   end
 
   private
-
-    # Since the grid is square, we can use either dimension for rows and cols
-    # I'll keep both methods if in the future I want to support non-square grids
-    def rows
-      grid_size
-    end
-
-    def cols
-      grid_size
-    end
-
-    def grid_size
-      @grid.length
-    end
 
     def will_be_alive?(current_state, neighbor_count)
       if current_state
@@ -92,7 +89,7 @@ class Game
     end
 
     def in_bounds?(row, col)
-      row >= 0 && row < rows && col >= 0 && col < cols
+      row >= 0 && row < height && col >= 0 && col < width
     end
 
     NEIGHBOR_OFFSETS = [

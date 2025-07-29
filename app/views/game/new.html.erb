@@ -1,29 +1,58 @@
 <div class="flex flex-col items-center min-h-full gap-6" data-controller="game" data-game-id="<%= SecureRandom.hex(8) %>">
   <h1 class="text-3xl font-bold">Conway's Game of Life</h1>
   <%= form_with id:"game-form", url: new_game_path, method: :get, scope: :game do |form| %>
-    <div class="flex gap-4">
+    <div class="flex gap-4 flex-wrap justify-center">
       <div class="flex items-center gap-2">
-        <label for="grid-size" class="block text-sm font-medium text-gray-700">Grid Size:</label>
-        <%= select_tag :size, 
-          options_for_select([
-            ['10x10', '10'],
-            ['20x20', '20'],
-            ['30x30', '30'],
-            ['40x40', '40'],
-            ['50x50', '50'],
-            ['60x60', '60'],
-            ['70x70', '70'],
-            ['80x80', '80'],
-            ['90x90', '90'],
-            ['100x100', '100']
-          ], params[:size] || '30'),
-          id: 'grid-size',
-          class: 'border border-gray-200 p-2 rounded-md',
+        <label for="grid-width" class="block text-sm font-medium text-gray-700">Width:</label>
+        <%= number_field_tag :width, 
+          params[:width] || 30,
+          id: 'grid-width',
+          min: 10,
+          max: 100,
+          class: 'border border-gray-200 p-2 rounded-md w-20',
+          data: {
+            game_target: 'widthInput'
+          },
+          onchange: 'this.form.submit()'
+        %>
+      </div>
+      <div class="flex items-center gap-2">
+        <label for="grid-height" class="block text-sm font-medium text-gray-700">Height:</label>
+        <%= number_field_tag :height, 
+          params[:height] || 30,
+          id: 'grid-height',
+          min: 10,
+          max: 100,
+          class: 'border border-gray-200 p-2 rounded-md w-20',
+          data: {
+            game_target: 'heightInput'
+          },
           onchange: 'this.form.submit()' 
         %>
       </div>
       <div class="flex items-center gap-2">
-        <label for="game-speed" class="block text-sm font-medium text-gray-700">Game speed (ms):</label>
+        <label for="preset-size" class="block text-sm font-medium text-gray-700">Preset:</label>
+        <%= select_tag :preset, 
+          options_for_select([
+            ['Custom', ''],
+            ['10x10', '10x10'],
+            ['20x20', '20x20'],
+            ['30x30', '30x30'],
+            ['40x40', '40x40'],
+            ['50x50', '50x50'],
+            ['30x20', '30x20'],
+            ['40x30', '40x30'],
+            ['60x40', '60x40'],
+            ['80x60', '80x60'],
+            ['100x80', '100x80']
+          ], ''),
+          id: 'preset-size',
+          class: 'border border-gray-200 p-2 rounded-md',
+          data: { action: 'change->game#applyPreset' }
+        %>
+      </div>
+      <div class="flex items-center gap-2">
+        <label for="game-speed" class="block text-sm font-medium text-gray-700">Speed (ms):</label>
         <%= select_tag :speed, 
           options_for_select([
             ['100', '100'],
@@ -46,6 +75,9 @@
       </div>
     </div>
   <% end %>
+  <div class="text-sm text-gray-600 mb-2">
+    Grid: <%= @game.width %> × <%= @game.height %> cells
+  </div>
   <%= render "grid", grid: @game.grid %>
   <div class="flex gap-4">
     <button type="button" class="py-2 px-4 rounded-md bg-green-600 hover:bg-green-700 text-white min-w-[100px]" data-action="game#togglePlay" data-game-target="playButton">Start</button>
