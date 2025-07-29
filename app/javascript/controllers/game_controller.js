@@ -1,82 +1,96 @@
 import { Controller } from "@hotwired/stimulus";
+import consumer from "channels/consumer";
 
-// Connects to data-controller="game"
 export default class extends Controller {
   static targets = ["grid", "speedInput", "playButton"];
 
   connect() {
     this.isPlaying = false;
-    this.intervalId = null;
+    this.gameId =
+      this.element.dataset.gameId || Math.random().toString(36).substring(7);
+    this.setupActionCable();
   }
 
   disconnect() {
-    if (this.intervalId) clearInterval(this.intervalId);
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  setupActionCable() {
+    this.subscription = consumer.subscriptions.create(
+      {
+        channel: "GameChannel",
+        game_id: this.gameId,
+      },
+      {
+        received: (data) => {
+          this.handleReceivedData(data);
+        },
+      }
+    );
+  }
+
+  handleReceivedData(data) {
+    switch (data.action) {
+      case "update_cells":
+        data.changes.forEach((change) => {
+          const cell = this.findCell(change.row, change.col);
+          if (cell) {
+            cell.setAttribute(
+              "data-cell-state",
+              change.alive ? "alive" : "dead"
+            );
+          }
+        });
+        break;
+
+      case "cell_toggled":
+        const cell = this.findCell(data.row, data.col);
+        if (cell) {
+          cell.setAttribute("data-cell-state", data.state ? "alive" : "dead");
+        }
+        break;
+    }
   }
 
   toggleCell(event) {
     if (this.isPlaying) return;
 
-    event.target.setAttribute(
-      "data-cell-state",
-      event.target.getAttribute("data-cell-state") === "alive"
-        ? "dead"
-        : "alive"
-    );
+    const cell = event.target;
+    const currentState = cell.getAttribute("data-cell-state") === "alive";
+    const newState = !currentState;
+
+    cell.setAttribute("data-cell-state", newState ? "alive" : "dead");
   }
 
   togglePlay() {
     if (this.isPlaying) {
-      this.#pause();
+      this.pause();
     } else {
-      this.#start();
+      this.start();
     }
   }
 
-  #start() {
+  start() {
     this.isPlaying = true;
-    this.#showPauseButton();
+    this.showPauseButton();
 
-    const speed = Math.min(
-      1000,
-      Math.max(300, parseInt(this.speedInputTarget.value))
-    );
+    const speed = parseInt(this.speedInputTarget.value);
 
-    this.intervalId = setInterval(() => {
-      this.#getNextGeneration();
-    }, speed);
-  }
-
-  #pause() {
-    this.isPlaying = false;
-    this.#showStartButton();
-
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-      this.intervalId = null;
-    }
-  }
-
-  async #getNextGeneration() {
-    const grid = this.#getCurrentGrid();
-    const response = await fetch("/game/next_generation", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRF-Token": document.querySelector("[name='csrf-token']").content,
-        Accept: "text/vnd.turbo-stream.html",
-      },
-      body: JSON.stringify({ grid: grid }),
+    this.subscription.perform("start_game", {
+      grid: this.getCurrentGrid(),
+      speed: speed,
     });
-
-    if (response.ok) {
-      const turboStream = await response.text();
-      Turbo.renderStreamMessage(turboStream);
-    } else {
-      console.error("Failed to fetch next generation:", response.statusText);
-    }
   }
 
-  #getCurrentGrid() {
+  pause() {
+    this.isPlaying = false;
+    this.showStartButton();
+    this.subscription.perform("stop_game");
+  }
+
+  getCurrentGrid() {
     const rows = this.gridTarget.querySelectorAll(".flex");
     const grid = [];
 
@@ -91,13 +105,19 @@ export default class extends Controller {
     return grid;
   }
 
-  #showStartButton() {
+  findCell(row, col) {
+    return this.gridTarget.querySelector(
+      `[data-row="${row}"][data-col="${col}"]`
+    );
+  }
+
+  showStartButton() {
     this.playButtonTarget.textContent = "Start";
     this.playButtonTarget.classList.remove("bg-blue-600", "hover:bg-blue-700");
     this.playButtonTarget.classList.add("bg-green-600", "hover:bg-green-700");
   }
 
-  #showPauseButton() {
+  showPauseButton() {
     this.playButtonTarget.textContent = "Pause";
     this.playButtonTarget.classList.remove(
       "bg-green-600",
