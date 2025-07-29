@@ -1,62 +1,60 @@
 <div class="flex flex-col items-center min-h-full gap-6" data-controller="game" data-game-id="<%= SecureRandom.hex(8) %>">
   <h1 class="text-3xl font-bold">Conway's Game of Life</h1>
-  <%= form_with id:"game-form", url: new_game_path, method: :get, scope: :game do |form| %>
-    <div class="flex gap-4 flex-wrap justify-center">
-      <div class="flex items-center gap-2">
-        <label for="grid-width" class="block text-sm font-medium text-gray-700">Width:</label>
-        <%= number_field_tag :width, 
-          params[:width] || 50,
-          id: 'grid-width',
-          min: 10,
-          max: 100,
-          class: 'border border-gray-200 p-2 rounded-md w-20',
-          data: {
-            game_target: 'widthInput'
-          },
-          onchange: 'this.form.submit()'
-        %>
-      </div>
-      <div class="flex items-center gap-2">
-        <label for="grid-height" class="block text-sm font-medium text-gray-700">Height:</label>
-        <%= number_field_tag :height, 
-          params[:height] || 30,
-          id: 'grid-height',
-          min: 10,
-          max: 100,
-          class: 'border border-gray-200 p-2 rounded-md w-20',
-          data: {
-            game_target: 'heightInput'
-          },
-          onchange: 'this.form.submit()' 
-        %>
-      </div>
-      <div class="flex items-center gap-2">
-        <label for="game-speed" class="block text-sm font-medium text-gray-700">Speed (ms):</label>
-        <%= select_tag :speed, 
-          options_for_select([
-            ['100', '100'],
-            ['200', '200'],
-            ['300', '300'],
-            ['400', '400'],
-            ['500', '500'],
-            ['600', '600'],
-            ['700', '700'],
-            ['800', '800'],
-            ['900', '900'],
-            ['1000', '1000']
-          ], params[:speed] || '300'),
-          id: 'game-speed',
-          class: 'border border-gray-200 p-2 rounded-md',
-          data: {
-            game_target: 'speedInput'
-          }
-        %>
-      </div>
+  <div class="flex gap-4 flex-wrap justify-center">
+    <div class="flex items-center gap-2">
+      <label for="grid-width" class="block text-sm font-medium text-gray-700">Width:</label>
+      <%= number_field_tag :width, 
+        params[:width] || 50,
+        id: 'grid-width',
+        min: 10,
+        max: 100,
+        class: 'border border-gray-200 p-2 rounded-md w-20',
+        data: {
+          game_target: 'widthInput',
+          action: 'change->game#resizeGrid'
+        }
+      %>
     </div>
-  <% end %>
+    <div class="flex items-center gap-2">
+      <label for="grid-height" class="block text-sm font-medium text-gray-700">Height:</label>
+      <%= number_field_tag :height, 
+        params[:height] || 30,
+        id: 'grid-height',
+        min: 10,
+        max: 100,
+        class: 'border border-gray-200 p-2 rounded-md w-20',
+        data: {
+          game_target: 'heightInput',
+          action: 'change->game#resizeGrid'
+        }
+      %>
+    </div>
+    <div class="flex items-center gap-2">
+      <label for="game-speed" class="block text-sm font-medium text-gray-700">Speed (ms):</label>
+      <%= select_tag :speed, 
+        options_for_select([
+          ['100', '100'],
+          ['200', '200'],
+          ['300', '300'],
+          ['400', '400'],
+          ['500', '500'],
+          ['600', '600'],
+          ['700', '700'],
+          ['800', '800'],
+          ['900', '900'],
+          ['1000', '1000']
+        ], params[:speed] || '300'),
+        id: 'game-speed',
+        class: 'border border-gray-200 p-2 rounded-md',
+        data: {
+          game_target: 'speedInput'
+        }
+      %>
+    </div>
+  </div>
   <%= render "grid", grid: @game.grid %>
   <div class="flex gap-4">
     <button type="button" class="py-2 px-4 rounded-md bg-green-600 hover:bg-green-700 text-white min-w-[100px]" data-action="game#togglePlay" data-game-target="playButton">Start</button>
-    <button type="submit" class="py-2 px-4 rounded-md bg-red-600 hover:bg-red-700 text-white min-w-[100px]" form="game-form">Reset</button>
+    <button type="button" class="py-2 px-4 rounded-md bg-red-600 hover:bg-red-700 text-white min-w-[100px]" data-action="game#resetGrid">Reset</button>
   </div>
 </div>
