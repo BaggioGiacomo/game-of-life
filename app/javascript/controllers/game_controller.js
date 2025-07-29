@@ -2,10 +2,20 @@ import { Controller } from "@hotwired/stimulus";
 
 // Connects to data-controller="game"
 export default class extends Controller {
-  static targets = ["grid"];
-  connect() {}
+  static targets = ["grid", "speedInput", "playButton"];
+
+  connect() {
+    this.isPlaying = false;
+    this.intervalId = null;
+  }
+
+  disconnect() {
+    if (this.intervalId) clearInterval(this.intervalId);
+  }
 
   toggleCell(event) {
+    if (this.isPlaying) return;
+
     event.target.setAttribute(
       "data-cell-state",
       event.target.getAttribute("data-cell-state") === "alive"
@@ -14,7 +24,39 @@ export default class extends Controller {
     );
   }
 
-  async getNextGeneration() {
+  togglePlay() {
+    if (this.isPlaying) {
+      this.#pause();
+    } else {
+      this.#start();
+    }
+  }
+
+  #start() {
+    this.isPlaying = true;
+    this.#showPauseButton();
+
+    const speed = Math.min(
+      1000,
+      Math.max(300, parseInt(this.speedInputTarget.value))
+    );
+
+    this.intervalId = setInterval(() => {
+      this.#getNextGeneration();
+    }, speed);
+  }
+
+  #pause() {
+    this.isPlaying = false;
+    this.#showStartButton();
+
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+    }
+  }
+
+  async #getNextGeneration() {
     const grid = this.#getCurrentGrid();
     const response = await fetch("/game/next_generation", {
       method: "POST",
@@ -47,5 +89,20 @@ export default class extends Controller {
     });
 
     return grid;
+  }
+
+  #showStartButton() {
+    this.playButtonTarget.textContent = "Start";
+    this.playButtonTarget.classList.remove("bg-blue-600", "hover:bg-blue-700");
+    this.playButtonTarget.classList.add("bg-green-600", "hover:bg-green-700");
+  }
+
+  #showPauseButton() {
+    this.playButtonTarget.textContent = "Pause";
+    this.playButtonTarget.classList.remove(
+      "bg-green-600",
+      "hover:bg-green-700"
+    );
+    this.playButtonTarget.classList.add("bg-blue-600", "hover:bg-blue-700");
   }
 }

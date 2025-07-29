@@ -1,6 +1,6 @@
 class GameController < ApplicationController
   def new
-    @game = Game.new(size: game_size || 30)
+    @game = Game.new(size: game_size)
   end
 
   def next_generation
@@ -17,7 +17,9 @@ class GameController < ApplicationController
   private
 
     def game_size
-      params[:size].to_i if params[:size].present?
+      return 30 unless params[:size].present?
+
+      params[:size].to_i.clamp(10, 70)
     end
 
     def render_grid_update(grid)
